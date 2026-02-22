@@ -2,9 +2,9 @@ VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev
 LATEST_TAG := $(shell git tag --list 'v*' --sort=-v:refname | head -n1)
 LDFLAGS := -ldflags "-s -w -X main.version=$(VERSION)"
 
-.PHONY: build test lint clean prepare
+.PHONY: build test lint clean
 
-all: build lint test prepare
+all: build lint test
 
 build: clean
 	go build $(LDFLAGS) -o dist/sc ./cmd/sc/

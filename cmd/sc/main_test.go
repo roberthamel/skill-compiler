@@ -291,7 +291,6 @@ func TestDiffDriftDetection(t *testing.T) {
 	// We test the drift detection logic via a subprocess since runDiff calls
 	// os.Exit(1) directly on drift, which can't be captured in-process.
 	dir := t.TempDir()
-	t.Setenv("HOME", dir)
 
 	// Copy petstore.yaml
 	petstore, err := os.ReadFile("../../internal/plugins/openapi/testdata/petstore.yaml")
@@ -321,7 +320,6 @@ func TestDiffDriftDetection(t *testing.T) {
 func TestDiffUpToDate(t *testing.T) {
 	// Test that diff exits 0 when lockfile matches current inputs.
 	dir := t.TempDir()
-	t.Setenv("HOME", dir)
 
 	// Copy petstore.yaml
 	petstore, err := os.ReadFile("../../internal/plugins/openapi/testdata/petstore.yaml")
