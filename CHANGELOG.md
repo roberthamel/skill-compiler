@@ -12,10 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org).
 - License section in README
 
 ### Changed
+- CI release job now scans all commits since last tag to determine semver bump type, instead of only the latest commit
 - Improved release notes extraction with more robust `awk` parsing in CI workflow
 - Updated goreleaser archive configuration to use `formats` list syntax
 - Restricted CI tag and release jobs to run only on the upstream repository
 - Enhanced `make prepare` to show full diffs instead of just changed file names
+- Clarified commit message and PR description prompt scope in Makefile
 
 ## [v0.5.0] - 2026-02-22
 

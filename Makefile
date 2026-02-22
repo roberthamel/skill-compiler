@@ -73,17 +73,19 @@ If no previous tag, start at v0.1.0.) \
 ---END_CHANGELOG--- \
 \
 ---COMMIT_MSG--- \
-(A conventional commit message. First line: type(scope): description under 72 chars. \
+(A conventional commit message for ONLY the current unstaged/staged/untracked changes, \
+NOT the full history since last tag. First line: type(scope): description under 72 chars. \
 Then a blank line, then a body with bullet points summarizing key changes. \
 Types: feat, fix, chore, refactor, docs, test, ci. Pick the most appropriate.) \
 ---END_COMMIT_MSG--- \
 \
 ---PR_TITLE--- \
-(A concise PR title under 70 chars summarizing the changes) \
+(A concise PR title under 70 chars summarizing ALL changes since the last tag) \
 ---END_PR_TITLE--- \
 \
 ---PR_BODY--- \
-(A PR description in markdown with a ## Summary section of 2-5 bullet points \
+(A PR description covering ALL changes since the last tag, in markdown \
+with a ## Summary section of 2-5 bullet points \
 and a ## Changes section listing key modifications) \
 ---END_PR_BODY---" > /tmp/sc-prepare-output.txt; \
 	sed -n '/^---CHANGELOG---$$/,/^---END_CHANGELOG---$$/{//d;p;}' /tmp/sc-prepare-output.txt > CHANGELOG.md; \

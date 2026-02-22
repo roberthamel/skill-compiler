@@ -34,19 +34,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Check if release should be skipped
-        id: check
-        run: |
-          MSG=$(git log -1 --format=%s)
-          if echo "$MSG" | grep -qE '^(ci|chore|docs|style|test)(\(.+\))?:'; then
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-            echo "Skipping release for: $MSG"
-          else
-            echo "skip=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Bump minor version and tag
-        if: steps.check.outputs.skip == 'false'
+      - name: Determine version bump from commits since last tag
         id: bump
         run: |
           LATEST=$(git tag --list 'v*' --sort=-v:refname | head -n1)
@@ -54,12 +42,42 @@ jobs:
             LATEST="v0.0.0"
           fi
 
+          # Scan all commits since last tag, pick the highest bump level
+          BUMP=""
+          while IFS= read -r -d '' COMMIT; do
+            MSG=${COMMIT%%$'\n'*}
+            if [[ "$COMMIT" == *$'\n'* ]]; then
+              BODY=${COMMIT#*$'\n'}
+            else
+              BODY=""
+            fi
+            if echo "$MSG" | grep -qE '^.+!:' || echo "$BODY" | grep -q 'BREAKING CHANGE'; then
+              BUMP="major"
+              break  # Can't go higher
+            elif echo "$MSG" | grep -qE '^feat(\(.+\))?:'; then
+              [ "$BUMP" != "major" ] && BUMP="minor"
+            elif echo "$MSG" | grep -qE '^(fix|perf|refactor)(\(.+\))?:'; then
+              [ -z "$BUMP" ] && BUMP="patch"
+            fi
+          done < <(git log "${LATEST}..HEAD" --format='%s%n%b%x00')
+
+          if [ -z "$BUMP" ]; then
+            echo "No releasable commits since $LATEST"
+            exit 0
+          fi
+
           MAJOR=$(echo "$LATEST" | sed 's/v//' | cut -d. -f1)
           MINOR=$(echo "$LATEST" | sed 's/v//' | cut -d. -f2)
+          PATCH=$(echo "$LATEST" | sed 's/v//' | cut -d. -f3)
 
-          NEXT="v${MAJOR}.$((MINOR + 1)).0"
+          case "$BUMP" in
+            major) NEXT="v$((MAJOR + 1)).0.0" ;;
+            minor) NEXT="v${MAJOR}.$((MINOR + 1)).0" ;;
+            patch) NEXT="v${MAJOR}.${MINOR}.$((PATCH + 1))" ;;
+          esac
 
           echo "Latest tag: $LATEST"
+          echo "Bump type: $BUMP"
           echo "Next tag: $NEXT"
 
           git tag "$NEXT"
