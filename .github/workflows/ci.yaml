@@ -16,4 +16,6 @@ jobs:
       - uses: golangci/golangci-lint-action@v7
         with:
           version: v2.6.0
-      - run: make test build
+      - run: go build ./cmd/sc/
+      - run: go test ./...
+      - run: go vet ./...

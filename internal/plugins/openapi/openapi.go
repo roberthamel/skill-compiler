@@ -174,10 +174,22 @@ func (p *Plugin) Parse(raw []byte, source instructions.SpecSource) (*ir.Intermed
 		},
 	}
 
-	// Parse operations from paths
+	// Parse operations from paths (sorted for deterministic output)
 	groupOps := make(map[string][]string)
-	for path, methods := range doc.Paths {
-		for method, op := range methods {
+	sortedPaths := make([]string, 0, len(doc.Paths))
+	for path := range doc.Paths {
+		sortedPaths = append(sortedPaths, path)
+	}
+	sort.Strings(sortedPaths)
+	for _, path := range sortedPaths {
+		methods := doc.Paths[path]
+		sortedMethods := make([]string, 0, len(methods))
+		for method := range methods {
+			sortedMethods = append(sortedMethods, method)
+		}
+		sort.Strings(sortedMethods)
+		for _, method := range sortedMethods {
+			op := methods[method]
 			opID := op.OperationID
 			if opID == "" {
 				opID = strings.ToLower(method) + "_" + strings.ReplaceAll(strings.Trim(path, "/"), "/", "_")
@@ -251,9 +263,14 @@ func (p *Plugin) Parse(raw []byte, source instructions.SpecSource) (*ir.Intermed
 				irOp.Responses = append(irOp.Responses, irResp)
 			}
 
-			// Auth references
+			// Auth references (sorted for deterministic output)
 			for _, sec := range op.Security {
+				secNames := make([]string, 0, len(sec))
 				for name := range sec {
+					secNames = append(secNames, name)
+				}
+				sort.Strings(secNames)
+				for _, name := range secNames {
 					irOp.Auth = append(irOp.Auth, name)
 				}
 			}
@@ -267,15 +284,27 @@ func (p *Plugin) Parse(raw []byte, source instructions.SpecSource) (*ir.Intermed
 		}
 	}
 
-	// Parse types from components/schemas
+	// Parse types from components/schemas (sorted for deterministic output)
 	if doc.Components != nil {
-		for name, schema := range doc.Components.Schemas {
+		sortedSchemas := make([]string, 0, len(doc.Components.Schemas))
+		for name := range doc.Components.Schemas {
+			sortedSchemas = append(sortedSchemas, name)
+		}
+		sort.Strings(sortedSchemas)
+		for _, name := range sortedSchemas {
+			schema := doc.Components.Schemas[name]
 			td := ir.TypeDef{
 				Name:        name,
 				Description: schema.Description,
 				Enum:        schema.Enum,
 			}
-			for fieldName, fieldSchema := range schema.Properties {
+			sortedFields := make([]string, 0, len(schema.Properties))
+			for fieldName := range schema.Properties {
+				sortedFields = append(sortedFields, fieldName)
+			}
+			sort.Strings(sortedFields)
+			for _, fieldName := range sortedFields {
+				fieldSchema := schema.Properties[fieldName]
 				required := false
 				for _, req := range schema.Required {
 					if req == fieldName {
@@ -293,8 +322,14 @@ func (p *Plugin) Parse(raw []byte, source instructions.SpecSource) (*ir.Intermed
 			result.Types = append(result.Types, td)
 		}
 
-		// Parse auth schemes
-		for name, scheme := range doc.Components.SecuritySchemes {
+		// Parse auth schemes (sorted for deterministic output)
+		sortedSecSchemes := make([]string, 0, len(doc.Components.SecuritySchemes))
+		for name := range doc.Components.SecuritySchemes {
+			sortedSecSchemes = append(sortedSecSchemes, name)
+		}
+		sort.Strings(sortedSecSchemes)
+		for _, name := range sortedSecSchemes {
+			scheme := doc.Components.SecuritySchemes[name]
 			result.Auth = append(result.Auth, ir.AuthScheme{
 				ID:          name,
 				Type:        scheme.Type,
@@ -306,8 +341,14 @@ func (p *Plugin) Parse(raw []byte, source instructions.SpecSource) (*ir.Intermed
 		}
 	}
 
-	// Build groups
-	for name, ops := range groupOps {
+	// Build groups (sorted for deterministic output)
+	sortedGroups := make([]string, 0, len(groupOps))
+	for name := range groupOps {
+		sortedGroups = append(sortedGroups, name)
+	}
+	sort.Strings(sortedGroups)
+	for _, name := range sortedGroups {
+		ops := groupOps[name]
 		result.Groups = append(result.Groups, ir.Group{
 			Name:       name,
 			Operations: ops,

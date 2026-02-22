@@ -261,10 +261,35 @@ func TestDiffErrorNoInstructions(t *testing.T) {
 	}
 }
 
+// scEnv returns an environment for running the sc binary in a temp directory.
+// It sets HOME to the temp dir (for config isolation) but preserves GOPATH and
+// GOMODCACHE so Go toolchain commands don't pollute the temp dir with read-only
+// module cache files.
+func scEnv(t *testing.T, dir string) []string {
+	t.Helper()
+	env := os.Environ()
+	env = append(env, "HOME="+dir)
+	return env
+}
+
+// buildSC builds the sc binary into the given directory and returns the path.
+// It does NOT set HOME to the temp dir for the build command, avoiding module
+// cache pollution.
+func buildSC(t *testing.T, dir string) string {
+	t.Helper()
+	repoRoot := filepath.Join(mustGetwd(t), "..", "..")
+	binPath := filepath.Join(dir, "sc")
+	build := exec.Command("go", "build", "-o", binPath, "./cmd/sc")
+	build.Dir = repoRoot
+	if out, err := build.CombinedOutput(); err != nil {
+		t.Fatalf("building sc: %v\n%s", err, out)
+	}
+	return binPath
+}
+
 func TestDiffDriftDetection(t *testing.T) {
 	// We test the drift detection logic via a subprocess since runDiff calls
 	// os.Exit(1) directly on drift, which can't be captured in-process.
-	// Build the binary and run it.
 	dir := t.TempDir()
 	t.Setenv("HOME", dir)
 
@@ -278,33 +303,23 @@ func TestDiffDriftDetection(t *testing.T) {
 	}
 
 	validInstructionsFixture(t, dir, "./petstore.yaml")
-
-	// Build the sc binary
-	binPath := filepath.Join(dir, "sc")
-	build := exec.Command("go", "build", "-o", binPath, "./cmd/sc")
-	build.Dir = filepath.Join(mustGetwd(t), "..", "..")
-	if out, err := build.CombinedOutput(); err != nil {
-		t.Fatalf("building sc: %v\n%s", err, out)
-	}
+	binPath := buildSC(t, dir)
 
 	// Run diff from the temp directory — should exit 1 (drift, no lockfile)
 	cmd := exec.Command(binPath, "diff")
 	cmd.Dir = dir
-	cmd.Env = append(os.Environ(), "HOME="+dir)
+	cmd.Env = scEnv(t, dir)
 	out, err := cmd.CombinedOutput()
 	if err == nil {
 		t.Fatal("expected non-zero exit from diff with no lockfile")
 	}
 	if !strings.Contains(string(out), "DRIFTED") && !strings.Contains(string(out), "changed") {
-		// Drift output should mention drifted artifacts
 		t.Logf("diff output: %s", string(out))
 	}
 }
 
 func TestDiffUpToDate(t *testing.T) {
 	// Test that diff exits 0 when lockfile matches current inputs.
-	// We use a two-pass approach: first run generates the lockfile via a helper,
-	// then sc diff should report all artifacts up to date.
 	dir := t.TempDir()
 	t.Setenv("HOME", dir)
 
@@ -318,23 +333,13 @@ func TestDiffUpToDate(t *testing.T) {
 	}
 
 	validInstructionsFixture(t, dir, "./petstore.yaml")
-
-	// Build the sc binary
+	binPath := buildSC(t, dir)
 	repoRoot := filepath.Join(mustGetwd(t), "..", "..")
-	binPath := filepath.Join(dir, "sc")
-	build := exec.Command("go", "build", "-o", binPath, "./cmd/sc")
-	build.Dir = repoRoot
-	if out, buildErr := build.CombinedOutput(); buildErr != nil {
-		t.Fatalf("building sc: %v\n%s", buildErr, out)
-	}
 
-	// Generate lockfile by running sc generate --dry-run, then capturing the
-	// hashes. Since dry-run doesn't write the lockfile, we use a different
-	// approach: run the write-lockfile helper from within the repo root,
-	// passing the target directory as an argument.
+	// Run the write-lockfile helper to create a lockfile with correct hashes.
+	// Do NOT set HOME for go run — it would pollute the temp dir with module cache.
 	helper := exec.Command("go", "run", "./cmd/sc/testdata/write_lockfile.go", dir)
 	helper.Dir = repoRoot
-	helper.Env = append(os.Environ(), "HOME="+dir)
 	if out, err := helper.CombinedOutput(); err != nil {
 		t.Fatalf("running lockfile helper: %v\n%s", err, out)
 	}
@@ -347,7 +352,7 @@ func TestDiffUpToDate(t *testing.T) {
 	// Run diff — should exit 0 (all up to date)
 	cmd := exec.Command(binPath, "diff")
 	cmd.Dir = dir
-	cmd.Env = append(os.Environ(), "HOME="+dir)
+	cmd.Env = scEnv(t, dir)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("expected exit 0 from diff with matching lockfile, got error: %v\noutput: %s", err, out)

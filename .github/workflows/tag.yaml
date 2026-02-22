@@ -1,0 +1,37 @@
+name: Auto Tag
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Bump minor version and tag
+        run: |
+          # Get latest v* tag, default to v0.0.0
+          LATEST=$(git tag --list 'v*' --sort=-v:refname | head -n1)
+          if [ -z "$LATEST" ]; then
+            LATEST="v0.0.0"
+          fi
+
+          # Parse major.minor.patch
+          MAJOR=$(echo "$LATEST" | sed 's/v//' | cut -d. -f1)
+          MINOR=$(echo "$LATEST" | sed 's/v//' | cut -d. -f2)
+
+          # Bump minor, reset patch
+          NEXT="v${MAJOR}.$((MINOR + 1)).0"
+
+          echo "Latest tag: $LATEST"
+          echo "Next tag: $NEXT"
+
+          git tag "$NEXT"
+          git push origin "$NEXT"
