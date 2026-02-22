@@ -25,7 +25,7 @@ jobs:
 
   tag:
     needs: build
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && github.repository == 'rhcloud-dev/skill-compiler'
     runs-on: ubuntu-latest
     outputs:
       new_tag: ${{ steps.bump.outputs.new_tag }}
@@ -68,7 +68,7 @@ jobs:
 
   release:
     needs: tag
-    if: github.ref == 'refs/heads/main' && needs.tag.outputs.new_tag != ''
+    if: github.ref == 'refs/heads/main' && github.repository == 'rhcloud-dev/skill-compiler' && needs.tag.outputs.new_tag != ''
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

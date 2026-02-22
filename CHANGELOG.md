@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org).
 
 ## [v0.6.0] - 2026-02-22
 
+### Added
+- Apache 2.0 LICENSE file
+- License section in README
+
 ### Changed
 - Improved release notes extraction with more robust `awk` parsing in CI workflow
 - Updated goreleaser archive configuration to use `formats` list syntax
+- Restricted CI tag and release jobs to run only on the upstream repository
+- Enhanced `make prepare` to show full diffs instead of just changed file names
 
 ## [v0.5.0] - 2026-02-22
 

@@ -28,11 +28,11 @@ prepare: all
 	fi; \
 	RANGE="$$LAST_TAG..HEAD"; \
 	COMMITS="$$(git log --oneline $$RANGE)"; \
-	DIFF_STAT="$$(git diff --stat $$LAST_TAG..HEAD 2>/dev/null || git diff --stat $$RANGE)"; \
-	UNSTAGED="$$(git diff --name-only)"; \
-	STAGED="$$(git diff --cached --name-only)"; \
+	DIFF_STAT="$$(git diff --stat $$LAST_TAG 2>/dev/null || git diff --stat)"; \
+	UNSTAGED_DIFF="$$(git diff)"; \
+	STAGED_DIFF="$$(git diff --cached)"; \
 	UNTRACKED="$$(git ls-files --others --exclude-standard)"; \
-	if [ -z "$$COMMITS" ] && [ -z "$$UNSTAGED" ] && [ -z "$$STAGED" ] && [ -z "$$UNTRACKED" ]; then \
+	if [ -z "$$COMMITS" ] && [ -z "$$UNSTAGED_DIFF" ] && [ -z "$$STAGED_DIFF" ] && [ -z "$$UNTRACKED" ]; then \
 		echo "Nothing to prepare — no commits since $$LAST_TAG and no local changes."; \
 		exit 0; \
 	fi; \
@@ -49,11 +49,11 @@ $${COMMITS:-none} \
 Diff stats: \
 $$DIFF_STAT \
 \
-Unstaged changes: \
-$${UNSTAGED:-none} \
+Unstaged diff: \
+$${UNSTAGED_DIFF:-none} \
 \
-Staged changes: \
-$${STAGED:-none} \
+Staged diff: \
+$${STAGED_DIFF:-none} \
 \
 Untracked files: \
 $${UNTRACKED:-none} \
