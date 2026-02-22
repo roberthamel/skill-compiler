@@ -51,7 +51,7 @@ jobs:
             else
               BODY=""
             fi
-            if echo "$MSG" | grep -qE '^.+!:' || echo "$BODY" | grep -q 'BREAKING CHANGE'; then
+            if echo "$MSG" | grep -qE '^.+!:' || echo "$BODY" | grep -qE '^BREAKING[ -]CHANGE:'; then
               BUMP="major"
               break  # Can't go higher
             elif echo "$MSG" | grep -qE '^feat(\(.+\))?:'; then

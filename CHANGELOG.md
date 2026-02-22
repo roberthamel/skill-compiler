@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org).
 - Restricted CI tag and release jobs to run only on the upstream repository
 - Enhanced `make prepare` to show full diffs instead of just changed file names
 - Clarified commit message and PR description prompt scope in Makefile
+- Tightened BREAKING CHANGE detection regex to require colon suffix and support hyphen variant
 
 ## [v0.5.0] - 2026-02-22
 
