@@ -3,7 +3,7 @@ package ir
 import (
 	"fmt"
 
-	"github.com/skill-compiler/sc/internal/instructions"
+	"github.com/roberthamel/skill-compiler/internal/instructions"
 )
 
 // Warning represents a non-fatal issue found during parsing or validation.

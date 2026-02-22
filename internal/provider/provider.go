@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/skill-compiler/sc/internal/config"
+	"github.com/roberthamel/skill-compiler/internal/config"
 )
 
 // GenerateRequest is the input to an LLM generation call.

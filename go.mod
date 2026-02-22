@@ -1,4 +1,4 @@
-module github.com/skill-compiler/sc
+module github.com/roberthamel/skill-compiler
 
 go 1.25.3
 

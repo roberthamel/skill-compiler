@@ -9,8 +9,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/skill-compiler/sc/internal/instructions"
-	"github.com/skill-compiler/sc/internal/ir"
+	"github.com/roberthamel/skill-compiler/internal/instructions"
+	"github.com/roberthamel/skill-compiler/internal/ir"
 )
 
 // Plugin handles codebase directory scanning.
