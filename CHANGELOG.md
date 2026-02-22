@@ -8,13 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org).
 ## [v1.2.0] - 2026-02-22
 
 ### Fixed
-- Use `grep -vFx` for exact tag matching in release notes fallback to avoid regex interpretation issues
-- Fixed SKIP_SCOPE_RE regex to use POSIX character class and support breaking change indicator (`!`) before colon
+- Fixed version detection regex in CI release workflow for more reliable tag parsing
+- Improved release notes fallback mechanism when changelog entry is missing
 
 ### Changed
 - Skip non-releasable commits in CI release workflow to avoid unnecessary version bumps
-- Improved release notes fallback to use `git describe` instead of `git tag --list` for finding previous tag
-- Added guard to prevent self-referencing tag comparison in release notes generation
+- Updated install.sh to reference new repository location (`rhcloud-dev/skill-compiler`)
 
 ## [v1.1.0] - 2026-02-22
 

@@ -2,9 +2,9 @@
 set -e
 
 # Skill Compiler (sc) installer
-# Usage: curl -fsSL https://raw.githubusercontent.com/roberthamel/skill-compiler/main/install.sh | sh
+# Usage: curl -fsSL https://raw.githubusercontent.com/rhcloud-dev/skill-compiler/main/install.sh | sh
 
-REPO="roberthamel/skill-compiler"
+REPO="rhcloud-dev/skill-compiler"
 BINARY="sc"
 INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
 
